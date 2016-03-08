@@ -1,21 +1,36 @@
 #!/usr/bin/make -f
 
+export V=1
 #export DH_VERBOSE=1
-LDFLAGS=-Wl,--as-needed,--no-undefined,--no-add-needed
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed,--no-undefined,--no-add-needed
+
+DPKG_EXPORT_BUILDFLAGS = 1
+include /usr/share/dpkg/buildflags.mk
+
+DH_EXTRA_ARGS := --buildsystem=cmake
+DEB_CMAKE_EXTRA_FLAGS := -DENABLE_CLI=ON \
+	-DENABLE_DAEMON=ON \
+	-DENABLE_GTK=ON \
+	-DENABLE_QT=ON \
+	-DUSE_SYSTEM_NATPMP=ON \
+	-DUSE_SYSTEM_MINIUPNPC=ON \
+	-DUSE_SYSTEM_EVENT2=ON \
+	-DUSE_QT5=ON \
+	-DTR_SCM_REVISION_RELIABLE=OFF
+
+
+DEB_HOST_ARCH_OS ?= $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
+ifeq ($(DEB_HOST_ARCH_OS),linux)
+	DH_EXTRA_ARGS += --with systemd
+	DEB_CMAKE_EXTRA_FLAGS += -DWITH_SYSTEMD=ON
+endif
 
 %:
-	dh $@ --with autotools-dev --with autoreconf
+	dh $@ $(DH_EXTRA_ARGS)
 
 override_dh_auto_configure:
-	dh_auto_configure -- \
-		--enable-cli --enable-daemon
-	# qt client has a separate build-system
-	# dh_auto_configure -Dqt
-
-override_dh_auto_build:
-	dh_auto_build
-	#dh_auto_build -Dqt
-	#(cd qt && lrelease qtr.pro)
+	dh_auto_configure  -O--buildsystem=cmake -O--with-systemd -- $(DEB_CMAKE_EXTRA_FLAGS)
 
 override_dh_installchangelogs:
 	dh_installchangelogs -p transmission-common NEWS
@@ -25,11 +40,15 @@ override_dh_installexamples:
 	dh_installexamples -p transmission-common
 
 override_dh_install:
-	dh_install --list-missing -X LICENSE # extra copy in web dir - costela 2008-08-15
+	install -d -o root -g root debian/tmp/usr/share/pixmaps
+	install -m 644 -o root -g root debian/transmission.xpm debian/tmp/usr/share/pixmaps
+	dh_install -O--buildsystem=cmake -O--with-systemd --list-missing -X LICENSE # extra copy in web dir - costela 2008-08-15
 
 override_dh_auto_install:
-	dh_auto_install
-	#dh_auto_install -Dqt -- INSTALL_ROOT=$(CURDIR)/debian/tmp/usr
+	dh_auto_install -O--buildsystem=cmake -O--with-systemd
 
 override_dh_strip:
 	dh_strip --dbg-package=transmission-dbg
+
+override_dh_bugfiles:
+	dh_bugfiles -A

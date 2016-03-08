@@ -1,3 +1,11 @@
+transmission (2.92-0ubuntu0.15.10.2) wily; urgency=medium
+
+  * build with cmake
+  * use qt5
+  * reactivate qt package
+
+ -- Andreas Roth <aroth@arsoft-online.com>  Tue, 08 Mar 2016 19:33:19 +0100
+
 transmission (2.92-0ubuntu0.15.10.1) wily; urgency=medium
 
   * New upstream release

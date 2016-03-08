@@ -2,23 +2,22 @@
 
 set -e
 
-test $DEBIAN_SCRIPT_DEBUG && set -v -x
-
 case "$1" in
-  configure|upgrade)
-    # Workaround for conffile messup pre-1.40-5.
-    # The explicit readlink comparison is necessary because of yet 
-    # another error on my part (forgot the "info" subdir on 1.40-4).
-    # costela - 2008-12-15
-    LIB_SETTINGS=/var/lib/transmission-daemon/info/settings.json
-    ETC_SETTINGS=/etc/transmission-daemon/settings.json
-    if [ -f $LIB_SETTINGS -a -L $ETC_SETTINGS -a \( $LIB_SETTINGS -ef $ETC_SETTINGS -o "$(readlink $ETC_SETTINGS)" = "/var/lib/transmission-daemon/settings.json" \) ]; then
-      rm $ETC_SETTINGS
-      cp -pf $LIB_SETTINGS $ETC_SETTINGS
+  upgrade)
+    if dpkg --compare-versions "$2" lt "2.84-0.2~"; then
+        mkdir -p /var/lib/transmission-daemon/.config/transmission-daemon
+        chown -R debian-transmission:debian-transmission /var/lib/transmission-daemon
+        usermod debian-transmission -d /var/lib/transmission-daemon
+        mv /var/lib/transmission-daemon/info/* /var/lib/transmission-daemon/.config/transmission-daemon
+        rmdir /var/lib/transmission-daemon/info
     fi
+  ;;
+  install|abort-upgrade)
+  ;;
+  *)
+    echo "preinst called with unknown argument '$1'" >&2
+    exit 1
   ;;
 esac
 
 #DEBHELPER#
-
-exit 0;
