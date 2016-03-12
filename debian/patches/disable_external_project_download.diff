@@ -1,0 +1,116 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -192,12 +192,15 @@
+         set(QT5_REQUIRED_MODULES Core Gui Widgets Network LinguistTools)
+         set(QT5_OPTIONAL_MODULES DBus AxContainer AxServer)
+         foreach(M ${QT5_REQUIRED_MODULES})
+-            find_package(Qt5${M} QUIET)
++            #find_package(Qt5${M} QUIET)
++            find_package(Qt5${M})
+             if(Qt5${M}_FOUND)
++                message(STATUS "Found Qt5${M}")
+                 if(NOT M STREQUAL "LinguistTools")
+                     list(APPEND QT_TARGETS Qt5::${M})
+                 endif()
+             else()
++                message(STATUS "Did not find Qt5${M}")
+                 set(QT_TARGETS)
+                 break()
+             endif()
+@@ -206,13 +209,16 @@
+             foreach(M ${QT5_OPTIONAL_MODULES})
+                 find_package(Qt5${M} QUIET)
+                 if(Qt5${M}_FOUND)
++                    message(STATUS "Found Qt5${M} optional")
+                     list(APPEND QT_TARGETS Qt5::${M})
+                 endif()
+             endforeach()
+             if(Qt5AxContainer_FOUND AND Qt5AxServer_FOUND)
++                message(STATUS "Found Qt5 Ax optional")
+                 set(ENABLE_QT_COM_INTEROP ON)
+             endif()
+             if(Qt5DBus_FOUND)
++                message(STATUS "Found Qt5 dbus optional")
+                 set(ENABLE_QT_DBUS_INTEROP ON)
+             endif()
+         endif()
+@@ -255,6 +261,9 @@
+     set(QT_FOUND ON)
+     if(NOT QT_TARGETS OR NOT (ENABLE_QT_COM_INTEROP OR ENABLE_QT_DBUS_INTEROP))
+         if(QT_IS_REQUIRED)
++            message(STATUS "QT_TARGETS=${QT_TARGETS}")
++            message(STATUS "ENABLE_QT_COM_INTEROP=${ENABLE_QT_COM_INTEROP}")
++            message(STATUS "ENABLE_QT_DBUS_INTEROP=${ENABLE_QT_DBUS_INTEROP}")
+             message(FATAL_ERROR "Unable to find required Qt libraries.")
+         endif()
+         set(QT_FOUND OFF)
+@@ -314,15 +323,17 @@
+     tr_add_external_auto_library(UTP utp
+         PATCH_COMMAND "${CMAKE_COMMAND}" -E copy "${THIRD_PARTY_DIR}/utp.cmake" "<SOURCE_DIR>/CMakeLists.txt"
+               COMMAND "${CMAKE_COMMAND}" -E copy "${THIRD_PARTY_DIR}/utp_config.h" "<SOURCE_DIR>/utp_config.h"
+-              COMMAND "${CMAKE_COMMAND}" -E chdir "<SOURCE_DIR>" patch -p1 --binary -i "${THIRD_PARTY_DIR}/utp-01-ticket-5002.patch"
+-              COMMAND "${CMAKE_COMMAND}" -E chdir "<SOURCE_DIR>" patch -p1 --binary -i "${THIRD_PARTY_DIR}/utp-02-win32.patch"
+-              COMMAND "${CMAKE_COMMAND}" -E chdir "<SOURCE_DIR>" patch -p1 --binary -i "${THIRD_PARTY_DIR}/utp-03-msvc14.patch")
++              #COMMAND "${CMAKE_COMMAND}" -E chdir "<SOURCE_DIR>" patch -p1 --binary -i "${THIRD_PARTY_DIR}/utp-01-ticket-5002.patch"
++              #COMMAND "${CMAKE_COMMAND}" -E chdir "<SOURCE_DIR>" patch -p1 --binary -i "${THIRD_PARTY_DIR}/utp-02-win32.patch"
++              #COMMAND "${CMAKE_COMMAND}" -E chdir "<SOURCE_DIR>" patch -p1 --binary -i "${THIRD_PARTY_DIR}/utp-03-msvc14.patch"
++              )
+ endif()
+ 
+ tr_add_external_auto_library(B64 b64
+     PATCH_COMMAND "${CMAKE_COMMAND}" -E copy "${THIRD_PARTY_DIR}/b64.cmake" "<SOURCE_DIR>/CMakeLists.txt"
+-          COMMAND "${CMAKE_COMMAND}" -E chdir "<SOURCE_DIR>" patch -p1 -i "${THIRD_PARTY_DIR}/b64-01-newline.patch"
+-          COMMAND "${CMAKE_COMMAND}" -E chdir "<SOURCE_DIR>" patch -p1 -i "${THIRD_PARTY_DIR}/b64-02-unsigned-char.patch")
++          #COMMAND "${CMAKE_COMMAND}" -E chdir "<SOURCE_DIR>" patch -p1 -i "${THIRD_PARTY_DIR}/b64-01-newline.patch"
++          #COMMAND "${CMAKE_COMMAND}" -E chdir "<SOURCE_DIR>" patch -p1 -i "${THIRD_PARTY_DIR}/b64-02-unsigned-char.patch"
++          )
+ 
+ if(WITH_INOTIFY)
+     tr_get_required_flag(WITH_INOTIFY INOTIFY_IS_REQUIRED)
+--- a/cmake/TrMacros.cmake
++++ b/cmake/TrMacros.cmake
+@@ -89,6 +89,13 @@
+     else()
+         set(${ID}_UPSTREAM_TARGET ${LIBNAME}-${${ID}_RELEASE})
+         set(${ID}_PREFIX "${CMAKE_BINARY_DIR}/third-party/${${ID}_UPSTREAM_TARGET}")
++        message(STATUS "${ID}_UPSTREAM=${${ID}_UPSTREAM}")
++        if(EXISTS ${CMAKE_SOURCE_DIR}/third-party/${LIBNAME})
++            set(${ID}_UPSTREAM SOURCE_DIR "${CMAKE_SOURCE_DIR}/third-party/${LIBNAME}")
++        else()
++            set(${ID}_UPSTREAM SOURCE_DIR "${CMAKE_SOURCE_DIR}/third-party/lib${LIBNAME}")
++        endif()
++        message(STATUS "${ID}_UPSTREAM=${${ID}_UPSTREAM}")
+ 
+         ExternalProject_Add(
+             ${${ID}_UPSTREAM_TARGET}
+@@ -111,6 +118,11 @@
+ 
+         set(${ID}_INCLUDE_DIRS ${${ID}_INCLUDE_DIR})
+         set(${ID}_LIBRARIES ${${ID}_LIBRARY})
++
++        message(STATUS "${ID}_INCLUDE_DIR=${${ID}_INCLUDE_DIR}")
++        message(STATUS "${ID}_LIBRARY=${${ID}_LIBRARY}")
++        message(STATUS "${ID}_PREFIX=${${ID}_PREFIX}")
++
+     endif()
+ endmacro()
+ 
+--- a/third-party/b64.cmake
++++ b/third-party/b64.cmake
+@@ -1,12 +1,12 @@
+ cmake_minimum_required(VERSION 2.8)
+ project(b64 C)
+ 
+-include_directories(include)
++include_directories(.)
+ 
+ add_library(${PROJECT_NAME} STATIC
+-    src/cdecode.c
+-    src/cencode.c
++    cdecode.c
++    cencode.c
+ )
+ 
+ install(TARGETS ${PROJECT_NAME} DESTINATION lib)
+-install(DIRECTORY include/b64 DESTINATION include)
++install(DIRECTORY b64 DESTINATION include)

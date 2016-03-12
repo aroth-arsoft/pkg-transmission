@@ -29,6 +29,10 @@ endif
 %:
 	dh $@ $(DH_EXTRA_ARGS)
 
+override_dh_clean:
+	dh_clean -O--buildsystem=cmake -O--with-systemd
+	-rm third-party/libb64/CMakeLists.txt
+
 override_dh_auto_configure:
 	dh_auto_configure  -O--buildsystem=cmake -O--with-systemd -- $(DEB_CMAKE_EXTRA_FLAGS)
 

@@ -3,7 +3,7 @@ Section: net
 Priority: optional
 Maintainer: Transmissionbt team <transmissionbt@lists.launchpad.net>
 XSBC-Original-Maintainer: Leo Costela <costela@debian.org>
-Build-Depends: autotools-dev,
+Build-Depends: cmake,
                debhelper (>= 8),
                dh-autoreconf,
                dh-systemd [linux-any],
@@ -17,10 +17,12 @@ Build-Depends: autotools-dev,
                libnotify-dev (>= 0.7),
                libssl-dev,
                libsystemd-dev [linux-any],
+               libsystemd-daemon-dev [linux-any],
                qt5-default,
                qt5-qmake,
                qtbase5-dev,
                qttools5-dev-tools,
+               qttools5-dev,
                zlib1g-dev,
  			   libappindicator3-dev
 Standards-Version: 3.9.6

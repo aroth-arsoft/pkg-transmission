@@ -1,3 +1,33 @@
+transmission (2.92-0ubuntu0.15.10.7) wily; urgency=medium
+
+  * disable external lib downloads
+
+ -- Andreas Roth <aroth@arsoft-online.com>  Sat, 12 Mar 2016 11:26:53 +0100
+
+transmission (2.92-0ubuntu0.15.10.6) wily; urgency=medium
+
+  * fixed libsystemd-daemon-dev
+
+ -- Andreas Roth <aroth@arsoft-online.com>  Thu, 10 Mar 2016 07:01:34 +0100
+
+transmission (2.92-0ubuntu0.15.10.5) wily; urgency=medium
+
+  * try with qttools5-dev
+
+ -- Andreas Roth <aroth@arsoft-online.com>  Thu, 10 Mar 2016 06:52:44 +0100
+
+transmission (2.92-0ubuntu0.15.10.4) wily; urgency=medium
+
+  * find qt build errors
+
+ -- Andreas Roth <aroth@arsoft-online.com>  Thu, 10 Mar 2016 06:44:02 +0100
+
+transmission (2.92-0ubuntu0.15.10.3) wily; urgency=medium
+
+  * add cmake as build dependency
+
+ -- Andreas Roth <aroth@arsoft-online.com>  Tue, 08 Mar 2016 19:48:13 +0100
+
 transmission (2.92-0ubuntu0.15.10.2) wily; urgency=medium
 
   * build with cmake
